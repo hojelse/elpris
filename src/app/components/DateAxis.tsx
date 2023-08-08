@@ -1,6 +1,7 @@
 import { useMemo } from "react"
 import * as d3 from 'd3'
 import { NewChartSettings } from "../hooks/useChartDimensions"
+import { dayOfTheMonthFormat as dayOfMonthFormat, hourFormat, monthFormat, weekDayFormat } from "../util/datetimeformats"
 
 type ArgType = {
   domain: Date[],
@@ -59,7 +60,7 @@ export const DateAxis = ({ dms, domain, range, numHoursShown }: ArgType) => {
               value.getHours() == 0 && // is first hour of day
               numHoursShown > 7*24 // is month view
             )
-            ? DayNumberText(value)
+            ? DayOfMonthText(value)
             : null
           }
           {
@@ -99,15 +100,7 @@ function HourText(value: Date) {
   </text>
 }
 
-function hourFormat(date: Date) {
-  return date.toLocaleString("da-DK", {
-    hour: "2-digit",
-    // minute: "2-digit",
-    hour12: false,
-  })
-}
-
-function DayNumberText(value: Date) {
+function DayOfMonthText(value: Date) {
   return <text
     key={"dayNumber-" + value.toISOString()}
     fill="var(--c-yellow-dark)"
@@ -117,14 +110,8 @@ function DayNumberText(value: Date) {
       transform: "translateY(-12px)"
     }}
   >
-    {dayNumberFormat(value)}
+    {dayOfMonthFormat(value)}
   </text>
-}
-
-function dayNumberFormat(date: Date) {
-  return date.toLocaleString("da-DK", {
-    day: "numeric"
-  })
 }
 
 function WeekDayText(value: Date) {
@@ -141,12 +128,6 @@ function WeekDayText(value: Date) {
   </text>
 }
 
-function weekDayFormat(date: Date) {
-  return date.toLocaleString("da-DK", {
-    weekday: "short",
-  })
-}
-
 function MonthText(value: Date) {
   return <text
     key={"month-" + value.toISOString()}
@@ -159,10 +140,4 @@ function MonthText(value: Date) {
   >
     {monthFormat(value)}
   </text>
-}
-
-function monthFormat(date: Date) {
-  return date.toLocaleString("da-DK", {
-    month: "short",
-  })
 }

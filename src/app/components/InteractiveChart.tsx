@@ -1,10 +1,11 @@
+"use client"
+
 import { NewChartSettings, useChartDimensions } from "../hooks/useChartDimensions";
 import * as d3 from "d3";
 import { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import { DateAxis } from "./DateAxis";
 import { PriceAxis } from "./PriceAxis";
-import styled from "styled-components";
-import { MashTypeHydated } from "../pages";
+import { dayOfTheMonthFormat, hourFormat, minuteFormat, monthFormat, myDateTimeFormat as fullDateTimeFormat } from "../util/datetimeformats";
 
 type DataEntries = {
   date: Date;
@@ -27,21 +28,20 @@ const chartSettings: ChartSettings = {
   marginBottom: 10
 }
 
-function myFormat(date: Date) {
-  return date.toLocaleString("da-DK", localeFormat)
-}
+type DataEntriesApi = {
+  date: Date;
+  marketPrice: number;
+  electricityTax: number;
+  netTarif: number;
+  vat: number;
+}[]
 
-const localeFormat : Intl.DateTimeFormatOptions = {
-  // year: 'numeric',
-  month: 'short',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false,
-  // timeZoneName: 'short'
-}
+export const InteractiveChart = ({ dataEntries }: { dataEntries: DataEntriesApi}) => {
 
-export const InterativeChart = ({ dataEntries }: { dataEntries: MashTypeHydated }) => {
+  if (dataEntries.length == 0) { 
+    throw new Error("No data entries...")
+  }
+
   const [currTime, setCurrTime] = useState(new Date())
 
   const refreshStuff = () => { setCurrTime(new Date()) }
@@ -116,9 +116,10 @@ export const InterativeChart = ({ dataEntries }: { dataEntries: MashTypeHydated 
     d3.scaleTime()
       .domain([beginDate, addHours(1, maxDate)])
       .range([0, dms.boundedWidth])
+      .nice()
 
   const [highlightOffset, setHighlightOffset] = useState<number | undefined>(undefined)
-  const highlightTime = (highlightOffset) ? xScale.invert(highlightOffset) : undefined
+  const highlightTime = highlightOffset ? xScale.invert(highlightOffset) : undefined
 
   const canvas_bound_area = boundArea.current?.getBoundingClientRect()
   const xclamp = (x: number) => {
@@ -364,22 +365,22 @@ export const InterativeChart = ({ dataEntries }: { dataEntries: MashTypeHydated 
           }}
         >
           <Toggle
-            name={"Markedspris"}
+            name={"Market Price"}
             state={withMarketPrice}
             set={setWithMarketPrice}
           />
           <Toggle
-            name={"Elafgift"}
+            name={"Electricity Tax"}
             state={withElafgift}
             set={setWithElafgift}
           />
           <Toggle
-            name={"Radius Nettarif"}
+            name={"Net Tariff (Radius)"}
             state={withNetTarif}
             set={setWithNetTarif}
           />
           <Toggle
-            name={"Moms"}
+            name={"VAT"}
             state={withVAT}
             set={setWithVAT}
           />
@@ -466,7 +467,7 @@ function Header({data, highlightTime, currTime}: {data: { date: Date; price: num
         margin: "0",
       }}
     >
-      {myFormat(highlightTime ?? currTime)}
+      {fullDateTimeFormat(highlightTime ?? currTime)}
     </p>
   </div>;
 }

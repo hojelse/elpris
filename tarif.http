@@ -1,1 +1,0 @@
-GET https://api.energidataservice.dk/dataset/DatahubPricelist?offset=0&sort=ValidFrom%20DESC&timezone=dk HTTP/1.1
